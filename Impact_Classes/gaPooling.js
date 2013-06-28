@@ -7,6 +7,24 @@ ig.module(
 )
 .defines(function(){ "use strict";
 
+
+//
+//        Pooling for Impact
+//
+// to pool automatically your entities
+//  just call ga.autoPoolEntities()
+// and pool your classes with EntitySomeBadGuy.setupInitPool( size-of-the-pool )
+// then if you only use spawnEntity() and kill() your entities are
+// taken from/put back in the pool automatically
+//
+// to pool a true javascript class, use MyClass.setupPool(100);
+// to pool a class with an init() scheme, use MyClass.setupInitPool(100);
+//
+// once a class is pooled, create an instance with :  var instance = MyClass.pnew(arg1,....);
+// and don't forget to dispose it when it is no longer used with : instance.pdispose();
+//
+
+
 window.ga = (window.ga) ? ga : {} ;
 
 //
@@ -14,45 +32,37 @@ window.ga = (window.ga) ? ga : {} ;
 //
 
 
-var pnew     = function() {
+Object.defineProperty(Function.prototype,'setupPool', { value : setupPool });
+
+function setupPool(initialPoolSize) {
+	if (!initialPoolSize || !isFinite(initialPoolSize)) throw('setupPool takes a size > 0 as argument.');
+    this.pool                = []          ;
+    this.poolSize            = 0           ;
+    this.pnew                = pnew        ;
+    Object.defineProperty(this.prototype, 'pdispose', { value : pdispose } ) ; 
+    // pre-fill the pool.
+    while (initialPoolSize-- >0) { (new this()).pdispose(); }
+}
+
+	
+function  pnew () {
     var pnewObj  = null     ; 
-    if (this.poolSize != 0 ) {
-           // the pool contains objects -&gt; grab one
+    if (this.poolSize !== 0 ) {              // the pool contains objects : grab one
            this.poolSize--  ;
            pnewObj = this.pool[this.poolSize];
-           this.pool[this.poolSize] = null   ; // **
+           this.pool[this.poolSize] = null   ; 
     } else {
-           // the pool is empty : create new object
-           pnewObj = new this() ;
-           this.builtCount++;
+           pnewObj = new this() ;             // the pool is empty : create new object
     }
-    // return initialized object.
-    this.apply(pnewObj, arguments);
+    this.apply(pnewObj, arguments);           // initialize object
     return pnewObj;
-};
+}
 
-var pdispose   = function() {
-    var thisCttr = this.constructor             ;
-    // throw the object back in the pool 
-    thisCttr.pool[thisCttr.poolSize++] = this ;
-};
-
-ga.setupPool  =  function(func, initialPoolSize) {
-    if (arguments.length != 2) { 
-        throw ('setupPool takes two arguments');    }
-    func.pool                = []        ;
-    func.poolSize            = 0         ;
-    func.builtCount          = initialPoolSize ;
-    func.pnew                = pnew      ;
-    func.prototype.pdispose  = pdispose  ; 
-    // pre-fill the pool.
-    if (initialPoolSize != 0)
-    {
-       for (var i=initialPoolSize; i--; ) {
-          (new func()).pdispose();
-        }
-    }
-};
+function pdispose() {
+    var thisCttr = this.constructor           ;
+    if (this.dispose) this.dispose()          ;  // Call dispose if defined
+    thisCttr.pool[thisCttr.poolSize++] = this ;  // throw the object back in the pool 
+}
 
 
 
@@ -60,48 +70,43 @@ ga.setupPool  =  function(func, initialPoolSize) {
 //         Pooling for objects using an init() scheme.
 //
 
-var Initpnew     = function() {
+Object.defineProperty(Function.prototype,'setupInitPool', { value : setupInitPool } );  
+
+function setupInitPool(initialPoolSize) {
+    if (arguments.length<2) { 
+        throw ('setupPool takes two arguments');    }
+    this.pool                = [] 				  ;
+    this.poolSize            = 0                  ;
+    this.pnew                = pnew           ;
+    Object.defineProperty(this.prototype, 'pdispose', { value : pdispose } ) ; 
+     // pre-fill the pool.
+    while (initialPoolSize-- >0) { (new this()).pdispose(); }                             
+};
+
+	
+function pnew() {
     var pnewObj  = null     ; 
     if (this.poolSize>0 ) {
            // the pool contains objects -> grab one
            this.poolSize--  ;
-           var  pnewObj = this.pool[this.poolSize];
+           pnewObj = this.pool[this.poolSize];
            this.pool[this.poolSize] = null   ; // **
 
     } else {
           // the pool is empty -> create new object
-          // this is the 'right way, but just too slow.
-          //   return this.apply ( Object.create (this.prototype) , arguments );
-          //  so instead we use new then initialize after :
-          pnewObj = new this();    
-          this.builtCount++;
+           pnewObj = new this();    
+           this.builtCount++;
     }
-     if (pnewObj.init) {
-    	                  pnewObj.init.apply(pnewObj, arguments); };
-           return pnewObj;
-};
+    if (pnewObj.init) {  pnewObj.init.apply(pnewObj, arguments); }
+    return pnewObj;
+}
 
-var Initpdispose   = function() {
-    var thisCttr = this.constructor             ;
+function pdispose() {
+    var thisCttr = this.constructor           ;
+    if (this.dispose) this.dispose()          ;  // Call dispose if defined 
     // throw the object back in the pool 
     thisCttr.pool[thisCttr.poolSize++] = this ;
-};
-
-ga.setupInitPool  =  function(func, initialPoolSize) {
-    if (arguments.length<2) { 
-        throw ('setupPool takes two arguments');    }
-    func.pool                = [] 				  ;
-    func.poolSize            = 0                  ;
-    func.pnew                = Initpnew           ;
-    func.builtCount          = initialPoolSize    ;
-    func.prototype.pdispose  = Initpdispose       ; 
-    // pre-fill the pool.
-       for (var i=initialPoolSize; i--;) {
-                var newObj = (new func());
-                newObj.pdispose(); 
-            }   
-                             
-};
+}
 
 
 //

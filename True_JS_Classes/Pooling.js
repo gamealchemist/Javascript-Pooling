@@ -6,7 +6,7 @@
 // http://gamealchemist.wordpress.com/2013/02/02/no-more-garbage-pooling-objects-built-with-constructor-functions/
 
 // Use with :
-//        ga.setupPool (MyClass, 100);
+//        MyClass.setupPool (100);
 //        var instance = MyClass.pnew (arg1, arg2, ...);
 //
 //  and when you're done with the object :
@@ -14,34 +14,33 @@
 //
 // if a dispose method is defined, it will get call inside pdispose();
 
-window.ga = (window.ga) ? ga : {} ;
-
 
 (function () {
 
-ga.setupPool  =  function (func, initialPoolSize) {
-    if (arguments.length != 2) {  throw ('setupPool takes two arguments');    }
-    func.pool                = []        ;
-    func.poolSize            = 0         ;
-    func.pnew                = pnew      ;
-    Object.defineProperty(func.prototype, 'pdispose', {value : pdispose } ) ; 
+Object.defineProperty(Function.prototype,'setupPool', { value : setupPool });
+
+function setupPool(initialPoolSize) {
+	if (!initialPoolSize || !isFinite(initialPoolSize)) throw('setupPool takes a size > 0 as argument.');
+    this.pool                = []          ;
+    this.poolSize            = 0           ;
+    this.pnew                = pnew        ;
+    Object.defineProperty(this.prototype, 'pdispose', { value : pdispose } ) ; 
     // pre-fill the pool.
-    while (initialPoolSize-- >0) { (new func()).pdispose(); }
-};
+    while (initialPoolSize-- >0) { (new this()).pdispose(); }
+}
 
 	
 function  pnew () {
     var pnewObj  = null     ; 
-    if (this.poolSize !== 0 ) {              // the pool contains objects  grab one
+    if (this.poolSize !== 0 ) {              // the pool contains objects : grab one
            this.poolSize--  ;
            pnewObj = this.pool[this.poolSize];
            this.pool[this.poolSize] = null   ; 
     } else {
            pnewObj = new this() ;             // the pool is empty : create new object
     }
-    // return initialized object.
-    this.apply(pnewObj, arguments);
-    retrun pnewObj;
+    this.apply(pnewObj, arguments);           // initialize object
+    return pnewObj;
 }
 
 function pdispose() {
