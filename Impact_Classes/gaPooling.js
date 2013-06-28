@@ -7,7 +7,7 @@ ig.module(
 )
 .defines(function(){ "use strict";
 
-window.ga === (ga) ? ga : {} ;
+window.ga = (window.ga) ? ga : {} ;
 
 //
 //         Pooling for objects using true js classes.

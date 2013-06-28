@@ -15,10 +15,10 @@
 //        instance.pdispose();
 
 
-window.ga === (ga) ? ga : {} ;
+window.ga = (window.ga) ? ga : {} ;
 
 
-(function {
+(function () {
 	
 var Initpnew     = function() {
     var pnewObj  = null     ; 
@@ -38,7 +38,7 @@ var Initpnew     = function() {
     }
      if (pnewObj.init) {
     	                  pnewObj.init.apply(pnewObj, arguments); };
-           return pnewObj;
+     return pnewObj;
 };
 
 var Initpdispose   = function() {

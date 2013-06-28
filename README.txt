@@ -25,7 +25,7 @@ So to make a long story short :
 
 True JS Classes look like :
 
-var MyClass = function(a1, a2, É) {
+var MyClass = function(a1, a2, ï¿½) {
     this.p1 = a1 ;
     this.p2 = a2 ;
     ...
@@ -34,32 +34,38 @@ var MyClass = function(a1, a2, É) {
 MyClass.prototype.meth1 = function( .., ..) {
 };
 
-MyClass.prototype.meth1 = function( .., ..) {
+MyClass.prototype.meth2 = function( .., ..) {
 };
 
-//To enable pooling on such a class,
-// use  :  /True_JS_Classes/Pooling.js
-// then  :
+To enable pooling on such a class,
+ get the file  :  /True_JS_Classes/Pooling.js
+
+and include it in your project (or copy-paste)/ then  :
 
 - check that the constructor initializes all 
-object properties, even when called
-with no arguments.
-- the constructor must return this.
+    object properties, even when called with no arguments.
+
 - setup the pool with its size with :
 ga.setupPool(MyClass, 100);
 
-- build a new item with :
-var myInstance = MyClass.pnew(a1,a2, É);
+- build a new item with the same arguments as with new() :
+var myInstance = MyClass.pnew(a1,a2, ... );
 
 -don't forget to dispose your unused objects with :
 myInstance.pdispose();
 
   !!! you should't keep any reference to a dispose object !!
+  
+- define a dispose() method on your class's prototype if
+you need to clear up things before reclaiming the object into
+the pool.
+( one example might be : if you are using properties that are
+themselves pooled.)
 
-- you can watch the maximum number of object in
-use with MyClass.builtCount.
-The initial pool size should be > to the max of
-the measured MyClass.builtCount for best efficiency.
+- you can watch the maximum number of object that was reach with MyClass.pool.length.
+
+- For best efficiency, the initial pool size should be >= to the 
+max of MyClass.pool.length for best efficiency.
 
 
 
@@ -73,9 +79,9 @@ If you are using a class system that does extend
 class with an object containing an init() function
 that will perform init at the end of the constructor.
 
-//To enable pooling on such a class,
-// use  :  /Init_Classes/PoolingInitClass
-// then  :
+To enable pooling on such a class,
+ use  :  /Init_Classes/PoolingInitClass
+ then  :
 
 
 - check that ** the init() function ** initializes 
@@ -85,7 +91,7 @@ all object properties, even when called with no arguments.
 ga.setupInitPool(MyClass, 100);
 
 - build a new item with :
-var myInstance = MyClass.pnew(a1,a2, É);
+var myInstance = MyClass.pnew(a1,a2, ï¿½);
 
 - don't forget to dispose your unused objects with :
 myInstance.pdispose();
