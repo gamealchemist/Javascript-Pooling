@@ -29,7 +29,7 @@
 
 (function () {
 
-Object.defineProperty(Function.prototype,'setupPool', { value : setupInitPool } );  
+Object.defineProperty(Function.prototype,'setupPool', { value : setupPool } );  
 
 // setupPool. 
 // setup a pool on the function (an init class constuctor), add a pnew method to 
@@ -37,7 +37,7 @@ Object.defineProperty(Function.prototype,'setupPool', { value : setupInitPool } 
 // so they can be sent back on the pool.
 // use : MyPureJSClass.setupPool(100);
 function setupPool(newPoolSize) {
-	if (!initialPoolSize || (!(newPoolSize>0))) throw('setupInitPool takes a size > 0 as argument.');
+	if (!initialPoolSize || (!(newPoolSize>0))) throw('setupPool takes a size > 0 as argument.');
     this.pool                = this.pool ||   []  ;
     this.poolSize			 = this.poolSize || 0 ;    
     this.pnew                = pnew               ;
