@@ -1,32 +1,31 @@
-ig.module(
-	'impact.gaPooling'
-)
-.requires(
-	'impact.impact',
-	'impact.entity'
-)
-.defines(function(){ "use strict";
+//
+//         Pooling for objects using true js classes.
+//
 
-
+// look here for explanations :
+// http://gamealchemist.wordpress.com/2013/02/02/no-more-garbage-pooling-objects-built-with-constructor-functions/
 //
-//        Pooling for Impact
 //
+//   This module allows to perform pooling on both pure Javascript classes
+//        and classes that have an initialisation scheme using an init method :
 //
-// to pool a true javascript class or to pool a class extending ig.Class,
-//  ( hence with an init() scheme ) use : 
-//                                MyClass.setupPool(100);
+//   !! If you use both pure Javascript classes and init classes, use
+//         this module                                       !!
 //
-// once a class is pooled, create an instance with :  var instance = MyClass.pnew(arg1,....);
-// and don't forget to dispose it when it is no longer used with : instance.pdispose();
+// Use with :
+//        MyClass.setupPool (100);
+//        var instance = MyClass.pnew (arg1, arg2, ...);  // same args as with  = new MyClass(...)
 //
-// to pool automatically your entities
-//  just call ga.autoPoolEntities()
-// and pool your classes with EntitySomeBadGuy.setupPool( size-of-the-pool )
-// then if you only use spawnEntity() and kill() your entities are
-// taken from/put back in the pool automatically
-
-
-window.ga = (window.ga) ? ga : {} ;
+//  and when you're done with the object :
+//        instance.pdispose();
+//
+//   do not reuse a pdipose object. you might want to set your var
+//      to null after pdisposing the object to ensure this.
+//
+//  Rq : you might want to do some clean up with a dipose method when
+//          your oject is pdiposed : 
+//           if a dispose method is defined, it will get call inside pdispose();
+(function () {
 
 Object.defineProperty(Function.prototype,'setupPool', { value : setupPool });
 
@@ -83,46 +82,5 @@ function pdispose() {
     thisCttr.pool[thisCttr.poolSize++] = this ;  // throw the object back in the pool 
 }
 
- 
+}                                                       )();
 
-//
-//        Helper for auto-pooling  of entites (provided you use spawnEntity and kill only)
-//
-
-
-ga.autoPoolEntities = function() {
-	
-		var EntityKill=ig.Entity.prototype.kill;
-		
-		ig.Entity.prototype.kill = function() {
-			    if (this.pdispose) { this.pdispose(); }		
-				ig.game.removeEntity( this );
-		};
-		
-		var spawnEntity =ig.Game.prototype.spawnEntity;
-		
-		ig.Game.prototype.spawnEntity =	 function( type, x, y, settings ) {
-		        if (!type) { throw ('cannot spawn entity of undefined type')}
-			    type =  ( typeof(type) === 'string' ) ? ig.global[type] : type;
-				
-			 	var ent = null;
-		 		if  (type.pnew) {
-		 			ent = type.pnew(x,y,settings )	
-		 			ent._killed = false;
-					var pr = ent.__proto__;
-					ent.type = pr.type  ; 
-					ent.checkAgainst = pr.checkAgainst; 
-					ent.collides =  pr.collides;  
-
-		 		} else  { ent = new (type)( x, y, settings ); }
-	 		
-		 		
-				this.entities.push( ent );
-				if( ent.name ) {
-					this.namedEntities[ent.name] = ent;
-				}
-				return ent;
-		};
-};
-
-});
