@@ -1,20 +1,33 @@
 //
 //         Pooling in Javascript
 //
+//  Original repository : https://github.com/gamealchemist/Javascript-Pooling
+
+//  Copyright  Vincent Piel 2013.
+//
+//  blog      : gamealchemist.wordpress.com/
+//
+//  Fair-ware : Share your thought if it brings you some, tell me 
+//    if it was of some use, and share profits if it brings you some.  
+//
 
 Pooling is basically about recycling object, in
 order to avoid memory allocation and garbage collection
 while your application is running.
 
-A pool is just a stack in which you will put your unused
-objects, and from which you will take new objects. This
-way you avoid both disallocation and reallocation, which
-is very efficient with short-lived / spawn often objects.
+A pool is a stack which stores objects from a given Class.
+Once an object is no longer of use, instead of dropping it,
+the pool stores it. When you later need a new object, it will
+be taken from the pool than initialized insted of beeing 
+created from scratch. This way you avoid memory disallocation
+, memory allocation and garbage collection, which
+is very efficient with short-lived / spawning often objects.
+
 If you pre-fill the pool with enough object during the app
 intialisation, you might even not need to create a single 
 instance of this object while the app is running.
 
-To install the pool, just use
+To install a pool on a class, just use
     MyClassFunction.setupPool(*initial pool size*)
 Then to grab an object from the pool, use 
     var myInstance = MyClassFunction.pnew(....)
@@ -32,14 +45,35 @@ when called with no arguments.
 initialise each and every property used by the object during its life.
 3) take good care of releasing any reference to a pdisposed object,
 weird bug could occur if you happen to reference the same object with
-two different names. 
+two different names.   
+!!! you should't keep any reference to a pdisposed object !!
+
+
+Advice :
+- re-use as much as possible your instance object/arrays/... when
+performing initialisation. For instance do not write :
+  this.myArray = [];
+but rather :
+  if (this.myArray) this.myArray.length = 0 ; else this.myArray = []; 
+- you can change the pool size on the go by calling again setupPool.
+- you can even clear the pool for an object that will no longer get
+used by calling setupPool(0) on the Class.
+- you might want to perform some specific actions when
+an object is pdisposed. -For instance you might want to pdispose some 
+pooled objects handled by your pooled Class. (nested pooling).
+In this case, just add a dispose (not *p*dispose) method to your object, 
+in which you do the clean-up, it will get called in the pdispose method.
+- you can watch the maximum number of object that was reached so far by
+looking at MyClass.pool.length 
+- For best efficiency, the initial pool size should be >= to the 
+max of MyClass.pool.length.
 
 I wrote 4 slighly different version :
 - one for true javascript classes (see below)
 - one for classes with a .init() scheme (see below)
 - one for both of those classes -mixed case-
-- one for Impact, which is just a repack of the mixed case + an utility function to
-      auto-pool entities.
+- one for Impact, which is just a repack of the mixed case
+   + an utility function to auto-pool entities.
       
 
 I wrote some explanations about pooling here :
@@ -53,9 +87,9 @@ http://gamealchemist.wordpress.com/2013/05/04/pooling-with-init-lets-throw-impac
 
 
 
-// ============================================
-// True Javascript classes :
-// ============================================
+// =================================================
+// Pooling True Javascript classes :
+// =================================================
 
 True JS Classes look like :
 
@@ -94,26 +128,12 @@ var myInstance = MyClass.pnew(a1,a2, ... );
 -don't forget to dispose your unused objects with :
 myInstance.pdispose();
 
-  !!! you should't keep any reference to a disposed object !!
-  
-Advanced users only :  define a dispose() method on your class's prototype if
-you need to clear up things before reclaiming the object into
-the pool.
-( one example might be : if you are using properties that are
-themselves pooled.)
-
-- you can watch the maximum number of object that was reached with MyClass.pool.length.
-
-- For best efficiency, the initial pool size should be >= to the 
-max of MyClass.pool.length.
+  !!! you should't keep any reference to a pdisposed object !!
 
 
-
-
-
-// ============================================
-// Javascript Classes using an init() scheme :
-// ============================================
+// ===================================================
+// Pooling Javascript Classes using an init() scheme :
+// ===================================================
 
 If you are using a class system that does extend
 class with an object containing an init() function
@@ -142,12 +162,7 @@ var myInstance = MyClass.pnew(a1,a2);
 - don't forget to dispose your unused objects with :
 myInstance.pdispose();
 
-  !!! you should't keep any reference to a dispose object !!
-
-- you can watch the maximum number of object in
-use with MyClass.builtCount.
-The initial pool size should be > to the max of
-the measured MyClass.builtCount for best efficiency.
+!!! you should't keep any reference to a pdisposed object !!
 
 
 // ============================================

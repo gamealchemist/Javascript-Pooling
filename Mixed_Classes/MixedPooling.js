@@ -1,12 +1,22 @@
 //
-//         Pooling for objects using true js classes.
+//         Pooling in Javascript
+//
+//  Original repository : https://github.com/gamealchemist/Javascript-Pooling
+
+//  Copyright  Vincent Piel 2013.
+//
+//  blog      : gamealchemist.wordpress.com/
+//
+//  Fair-ware : Share your thought if it brings you some, tell me 
+//    if it was of some use, and share profits if it brings you some.  
 //
 
-// look here for explanations :
-// http://gamealchemist.wordpress.com/2013/02/02/no-more-garbage-pooling-objects-built-with-constructor-functions/
+
+//
+//     Pooling for objects using both true js classes or an init() scheme
 //
 //
-//   This module allows to perform pooling on both pure Javascript classes
+//   This module allows to perform pooling on *both* pure Javascript classes
 //        and classes that have an initialisation scheme using an init method :
 //
 //   !! If you use both pure Javascript classes and init classes, use
@@ -21,6 +31,9 @@
 //
 //   do not reuse a pdipose object. you might want to set your var
 //      to null after pdisposing the object to ensure this.
+//
+// resize at any time your pool by calling  MyClass.setupPool(...); again
+// clear the pool by calling MyClass.setupPool(0);
 //
 //  Rq : you might want to do some clean up with a dipose method when
 //          your oject is pdiposed : 
@@ -39,7 +52,7 @@ Object.defineProperty(Function.prototype,'init', { value : null, configurable : 
 //   or   MyExtendedClass.setupPool(10);
 // then : var myInstance = MyPureJSClass.pnew(23, 'arg 2', ..);
 function setupPool(newPoolSize) {
-	if (!(newPoolSize>0)) throw('setupPool takes a size > 0 as argument.');
+	if (!(newPoolSize>=0)) throw('setupPool takes a size >= 0 as argument.');
     this.pool                = this.pool || []    ;
     this.poolSize            = this.poolSize || 0 ;
     this.pnew                = pnew               ;

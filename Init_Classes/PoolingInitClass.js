@@ -1,11 +1,21 @@
 //
+//         Pooling in Javascript
+//
+//  Original repository : https://github.com/gamealchemist/Javascript-Pooling
+
+//  Copyright  Vincent Piel 2013.
+//
+//  blog      : gamealchemist.wordpress.com/
+//
+//  Fair-ware : Share your thought if it brings you some, tell me 
+//    if it was of some use, and share profits if it brings you some.  
+//
+
+
+//
 //         Pooling for objects using an init() scheme.
 //
 
-// look here for explanations :
-// http://gamealchemist.wordpress.com/2013/02/02/no-more-garbage-pooling-objects-built-with-constructor-functions/
-// and here :
-// http://gamealchemist.wordpress.com/2013/05/04/pooling-with-init-lets-throw-impactjs-classes-in-the-pool/
 //
 //   This module allows to perform pooling on classes that are defined
 //        with an extend method and a parameter object and that make use 
@@ -20,6 +30,10 @@
 //
 //  and when you're done with the object :
 //        instance.pdispose();
+//
+// 
+// resize at any time your pool by calling  MyClass.setupPool(...); again
+// clear the pool by calling MyClass.setupPool(0);
 //
 //
 //  Rq : you might want to do some clean up with a dipose method when
@@ -37,7 +51,7 @@ Object.defineProperty(Function.prototype,'setupPool', { value : setupPool } );
 // so they can be sent back on the pool.
 // use : MyPureJSClass.setupPool(100);
 function setupPool(newPoolSize) {
-	if (!initialPoolSize || (!(newPoolSize>0))) throw('setupPool takes a size > 0 as argument.');
+	if (!(newPoolSize>=0)) throw('setupPool takes a size >= 0 as argument.');
     this.pool                = this.pool ||   []  ;
     this.poolSize			 = this.poolSize || 0 ;    
     this.pnew                = pnew               ;
