@@ -3,7 +3,8 @@ ig.module(
 )
 .requires(
 	'impact.impact',
-	'impact.entity'
+	'impact.entity',
+	'impact.game'
 )
 .defines(function(){ "use strict";
 
