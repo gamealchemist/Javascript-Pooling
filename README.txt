@@ -61,7 +61,7 @@ used by calling setupPool(0) on the Class.
 - you might want to perform some specific actions when
 an object is pdisposed. -For instance you might want to pdispose some 
 pooled objects handled by your pooled Class. (nested pooling).
-In this case, just add a dispose (not *p*dispose) method to your object, 
+In this case, just add a dispose (! not *p*dispose) method to your object, 
 in which you do the clean-up, it will get called in the pdispose method.
 - you can watch the maximum number of object that was reached so far by
 looking at MyClass.pool.length 
@@ -74,6 +74,7 @@ I wrote 4 slighly different version :
 - one for both of those classes -mixed case-
 - one for Impact, which is just a repack of the mixed case
    + an utility function to auto-pool entities.
+   + a fix for a current bug in impact ( use ga.fixImpactPooling to fix)
       
 
 I wrote some explanations about pooling here :
